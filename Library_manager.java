@@ -7,30 +7,156 @@ public class Library_manager
 {   
     /*enum constructors*/
     enum types
+    {
+        Student(3),
+        Teacher(5),
+        Staff(1);
+
+        final int maxBooks;
+
+        types(int maxBooks)
         {
-            Student(3),
-            Teacher(5),
-            Staff(1);
+            this.maxBooks=maxBooks;
+        }
+        public int getMaxBooks()
+        {
+            return maxBooks;
+        }
+    }
 
-            final int maxBooks;
 
-            types(int maxBooks)
+    public static void displayBooks(ArrayList<String> Titles,ArrayList<String> Authors,ArrayList<String> Genres,ArrayList<Integer> UpdateStatus)
+    {
+        if(!Titles.isEmpty())
+        {
+            System.out.println("Showing all books from library :");
+            for (int i = 0; i < Titles.size(); i++)
             {
-                this.maxBooks=maxBooks;
-            }
-            public int getMaxBooks()
-            {
-                return maxBooks;
+                System.out.println("Book name :"+Titles.get(i)+"  Book author :"+Authors.get(i)+"  Book genre :"+Genres.get(i)+"  Books available :"+UpdateStatus.get(i)+"");
             }
         }
+        else
+        {
+            System.out.println("No books available");
+        }
+    }
+    
+
+    public static void displayBooks(ArrayList<String> Titles,ArrayList<String> Authors,ArrayList<String> Genres,ArrayList<Integer> UpdateStatus,String genreFilter)
+    {
+        if(!Titles.isEmpty())
+        {
+            System.out.println("Showing all books from library :");
+            for (int i = 0; i < Titles.size(); i++)
+            {
+                if(Genres.get(i).equals(genreFilter))
+                {
+                    System.out.println("Book name :"+Titles.get(i)+"  Book author :"+Authors.get(i)+"  Book genre :"+Genres.get(i)+"  Books available :"+UpdateStatus.get(i)+"");
+                }
+            }
+        }
+        else
+        {
+            System.out.println("No books available");
+        }
+    }
+
+
+    public static void displayMembers(ArrayList<String> Names,ArrayList<String> Ids,ArrayList<String> Types,ArrayList<String> BorrowerName)
+    {
+        double percentBorrowing;
+        System.out.println("Showing all members :");
+        for(int i=0;i<Names.size();i++)
+        {
+            System.out.println("Id :"+Ids.get(i)+"  Names :"+Names.get(i)+"  Membership type :"+Types.get(i)+"");
+        }
+        if(!Names.isEmpty())
+        {
+            percentBorrowing=(double) BorrowerName.size()/Names.size()*100;
+            System.out.println("Percentage of members currently borrowing books :"+percentBorrowing+"%");
+        }
+    }
+
+
+    public static void bookBorrower(ArrayList<String> BorrowerName,ArrayList<String> BorrowerTitle,ArrayList<LocalDate> DueDates)
+    {
+        System.out.println("Showing all book borrowers :");
+        for(int i=0;i<BorrowerName.size();i++)
+        {
+            System.out.println("Borrower name :"+BorrowerName.get(i)+"  Borrowed book :"+BorrowerTitle.get(i)+"  Due date :"+DueDates.get(i)+"");
+        }
+    }
+
+
+    public static void overdueBooks(ArrayList<LocalDate> DueDates,ArrayList<String> BorrowerTitle,ArrayList<String> BorrowerName)
+    {
+        String[] lateness={"Just overdue","Moderately overdue","Severely overdue"};
+        long daysLate;
+        int index;
+        boolean found=false;
+        System.out.println("Showing overdue books :");
+        for(int i=0;i<DueDates.size();i++)
+        {
+            if(DueDates.get(i).isBefore(LocalDate.now()))
+            {
+                daysLate=ChronoUnit.DAYS.between(DueDates.get(i),LocalDate.now());
+                if(daysLate>=10)
+                {
+                    index=2;
+                }
+                else if(daysLate>=5)
+                {
+                    index=1;
+                }
+                else
+                {
+                    index=0;
+                }
+                System.out.println("Borrower name :"+BorrowerName.get(i)+"  Borrowed book :"+BorrowerTitle.get(i)+"  Due date :"+DueDates.get(i)+"  OVERDUE :"+lateness[index]+"");
+                found=true;
+            }
+        }
+        if(found==false)
+        {
+            System.out.println("No overdue books borrowed");
+        }
+    }
+
+
+    public static boolean recursiveSearchTitle(ArrayList<String> Titles,int index,String search)
+    {
+        if(index==Titles.size())
+        {
+            return false;
+        }
+        if(Titles.get(index).equals(search))
+        {
+            return true;
+        }
+        return recursiveSearchTitle(Titles, index+1, search);
+    }
+
+
+    public static boolean recursiveSearchAuthor(ArrayList<String> Author,int index,String search)
+    {
+        if(index==Author.size())
+        {
+            return false;
+        }
+        if(Author.get(index).equals(search))
+        {
+            return true;
+        }
+        return recursiveSearchAuthor(Author, index+1, search);
+    }
+
+    
     public static void main(String[] args) 
     {   
         System.out.println("-----Library manager-----");
-        int choice,choose,numberOfBooks,status,borrowCount,limit,idNumber,index;
-        String title,author,genre,search,remove,name,type,available,update,borrow,returnBook,id;
-        boolean found,validType,exit=false,availabilityStatus,updateStatus;
-        double percentBorrowing;
-        long daysLate;
+        int choice,status;
+        String name,type,genreFilter;
+        boolean found,exit=false,availabilityStatus,updateStatus;
 
         ArrayList<String>Titles = new ArrayList<>();
         ArrayList<String>Authors = new ArrayList<>();
@@ -43,7 +169,6 @@ public class Library_manager
         ArrayList<String>BorrowerTitle = new ArrayList<>();
         ArrayList<LocalDate>DueDates = new ArrayList<>();
 
-        String[] lateness={"Just overdue","Moderately overdue","Severely overdue"};
         String[] options={"1-Add book","2-Display books","3-Search book","4-Remove book","5-Register member","6-Display members",
         "7-Borrow book","8-Update status of books","9-Return book","10-Book borrowers","11-Over due books","12-Exit"};
         String []option={"1-Search by title","2-search by author"};
@@ -73,10 +198,13 @@ public class Library_manager
                         choice=-1;
                     }
                 }
+
                 switch(choice)
                 {
                     case 1->
                     {
+                        int numberOfBooks;
+                        String title,author,genre;
                         System.out.println("Enter the details of book to add :");
                         System.out.print("Enter the title of book :");
                         title = val.nextLine().trim();
@@ -118,25 +246,26 @@ public class Library_manager
                         System.out.println("Book details added");
                     }
 
+
                     case 2->
                     {
-                        if(!Titles.isEmpty())
+                        System.out.print("Enter genre to filter by (or press Enter to see all):");
+                        genreFilter = val.nextLine().trim();
+                        if(genreFilter.isEmpty())
                         {
-                            System.out.println("Showing all books from library :");
-                            for (int i = 0; i < Titles.size(); i++)
-                            {
-                                System.out.println("Book name :"+Titles.get(i)+"  Book author :"+Authors.get(i)+"  Book genre :"+Genres.get(i)+"  Books available :"+UpdateStatus.get(i)+"");
-                            }
+                            displayBooks(Titles,Authors,Genres,UpdateStatus);
                         }
                         else
                         {
-                            System.out.println("No books available");
+                            displayBooks(Titles,Authors,Genres,UpdateStatus,genreFilter);
                         }
                     }
                     
+
                     case 3->
                     {
-                        found=false;
+                        int choose;
+                        String search;
                         System.out.println("Menu :");
                         for (String value : option)
                         {
@@ -158,6 +287,7 @@ public class Library_manager
                                 choose=-1;
                             }
                         }
+
                         switch(choose)
                         {
                             case 1->
@@ -165,34 +295,29 @@ public class Library_manager
                                 System.out.print("Enter the title of book to search :");
                                 search=val.nextLine().trim();
                                 System.out.println("Searching...");
-                                for(int i=0;i<Titles.size();i++)
+                                found=recursiveSearchTitle(Titles,0, search);
+                                if(found==true)
                                 {
-                                    if(Titles.get(i).equals(search))
-                                    {
-                                        System.out.println("Book Found at index :"+i);
-                                        found=true;
-                                    }
+                                    System.out.println("Book found");
                                 }
-                                if(found==false)
+                                else
                                 {
                                     System.out.println("No books found");
                                 }
                             }
+
 
                             case 2->
                             {
                                 System.out.print("Enter the author of book to search :");
                                 search=val.nextLine().trim();
                                 System.out.println("Searching...");
-                                for(int i=0;i<Authors.size();i++)
+                                found=recursiveSearchAuthor(Authors,0, search);
+                                if(found==true)
                                 {
-                                    if(Authors.get(i).equals(search))
-                                    {
-                                        System.out.println("Book Found at index :"+i);
-                                        found=true;
-                                    }
+                                    System.out.println("Book found");
                                 }
-                                if(found==false)
+                                else
                                 {
                                     System.out.println("No books found");
                                 }
@@ -205,8 +330,10 @@ public class Library_manager
                         }
                     }
 
+
                     case 4->
                     {
+                        String remove;
                         found=false;
                         System.out.print("Enter the title of book to remove :");
                         remove=val.nextLine().trim();
@@ -228,8 +355,12 @@ public class Library_manager
                         }
                     }
                     
+
                     case 5->
                     {
+                        String id;
+                        boolean validType;
+                        int idNumber;
                         validType=false;
                         System.out.println("Register new member details :");
                         System.out.print("Enter the name :");
@@ -267,22 +398,17 @@ public class Library_manager
                         }
                     }
 
+
                     case 6->
                     {
-                        System.out.println("Showing all members :");
-                        for(int i=0;i<Names.size();i++)
-                        {
-                            System.out.println("Id :"+Ids.get(i)+"  Names :"+Names.get(i)+"  Membership type :"+Types.get(i)+"");
-                        }
-                        if(!Names.isEmpty())
-                        {
-                            percentBorrowing=(double) BorrowerName.size()/Names.size()*100;
-                            System.out.println("Percentage of members currently borrowing books :"+percentBorrowing+"%");
-                        }
+                        displayMembers(Names,Ids,Types,BorrowerName);
                     }
+
 
                     case 7->
                     {
+                        String available,borrow;
+                        int borrowCount,limit;
                         availabilityStatus=false;
                         borrowCount=0;
                         type="";
@@ -356,8 +482,10 @@ public class Library_manager
                         }
                     }
 
+
                     case 8->
                     {
+                        String update;
                         updateStatus=false;
                         System.out.print("Enter the title of book to update status :");
                         update=val.nextLine().trim();
@@ -394,8 +522,10 @@ public class Library_manager
                         }
                     }
 
+
                     case 9->
                     {
+                        String returnBook;
                         availabilityStatus=false;
                         System.out.print("Enter the title  of book to return :");
                         returnBook=val.nextLine().trim();
@@ -431,51 +561,25 @@ public class Library_manager
                         }
                     }
 
+
                     case 10->
                     {
-                        System.out.println("Showing all book borrowers :");
-                        for(int i=0;i<BorrowerName.size();i++)
-                        {
-                            System.out.println("Borrower name :"+BorrowerName.get(i)+"  Borrowed book :"+BorrowerTitle.get(i)+"  Due date :"+DueDates.get(i)+"");
-                        }
+                        bookBorrower(BorrowerName,BorrowerTitle,DueDates);
                     }
+
 
                     case 11->
                     {
-                        found=false;
-                        System.out.println("Showing overdue books :");
-                        for(int i=0;i<DueDates.size();i++)
-                        {
-                            if(DueDates.get(i).isBefore(LocalDate.now()))
-                            {
-                                daysLate=ChronoUnit.DAYS.between(DueDates.get(i),LocalDate.now());
-                                if(daysLate>=10)
-                                {
-                                    index=2;
-                                }
-                                else if(daysLate>=5)
-                                {
-                                    index=1;
-                                }
-                                else
-                                {
-                                    index=0;
-                                }
-                                System.out.println("Borrower name :"+BorrowerName.get(i)+"  Borrowed book :"+BorrowerTitle.get(i)+"  Due date :"+DueDates.get(i)+"  OVERDUE :"+lateness[index]+"");
-                                found=true;
-                            }
-                        }
-                        if(found==false)
-                        {
-                            System.out.println("No overdue book borrowers");
-                        }
+                        overdueBooks(DueDates,BorrowerTitle,BorrowerName);
                     }
+
 
                     case 12->
                     {
                         System.out.println("Visit again");
                         exit=true;
                     }
+
 
                     default->
                     {
