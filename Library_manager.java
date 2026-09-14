@@ -54,12 +54,28 @@ public class Library_manager
         {
             return numberOfBooks>0;
         }
+        class BorrowInfo
+        {
+            String borrowerName;
+            LocalDate dueDate;
+
+            BorrowInfo(String borrowerName, LocalDate dueDate)
+            {
+                this.borrowerName=borrowerName;
+                this.dueDate=dueDate;
+            }
+
+            void printInfo()
+            {
+                System.out.println(title+" is borrowed by "+borrowerName+", date : "+dueDate);
+            }
+        }
     }
 
 
     public static abstract class Person
     {
-        private String name,id;
+        private final String name,id;
         Person(String name,String id)
         {
             this.name=name;
@@ -76,9 +92,15 @@ public class Library_manager
     } 
 
 
-    public static class Member extends Person
+    public interface Privileged
+        {
+            String getPrivileges();
+        }
+
+
+    public static class Member extends Person implements Privileged
     {
-        private types type;
+        private final types type;
         Member(String name,String id,types type)
         {
             super(name,id);
@@ -88,12 +110,17 @@ public class Library_manager
         {
             return type;
         }
+        @Override 
+        public String getPrivileges()
+        {
+            return "Can borrow up to "+type.getMaxBooks()+" books as a "+type+"";
+        }
     }
 
 
-    public static class Librarian extends Person
+    public static class Librarian extends Person implements Privileged
     {
-        private String department;
+        private final String department;
         Librarian(String name,String id,String department)
         {
             super(name,id);
@@ -103,15 +130,20 @@ public class Library_manager
         {
             return department;
         }
+        @Override 
+        public String getPrivileges()
+        {
+            return "Manages "+department+" department, full library access";
+        }
     }
 
 
     /*enum constructors*/
-    enum types
+    public enum types
     {
-        Student(3),
-        Teacher(5),
-        Staff(1);
+        STUDENT(3),
+        TEACHER(5),
+        STAFF(1);
 
         final int maxBooks;
 
@@ -258,8 +290,6 @@ public class Library_manager
         }
     }
 
-
-  
     
     public static void main(String[] args) 
     {   
@@ -270,6 +300,7 @@ public class Library_manager
 
         ArrayList<Book>Books=new ArrayList<>();
         ArrayList<Member>Members=new ArrayList<>();
+        ArrayList<Privileged>AllPeople=new ArrayList<>();
 
         ArrayList<String>BorrowerName = new ArrayList<>();
         ArrayList<String>BorrowerTitle = new ArrayList<>();
@@ -278,7 +309,7 @@ public class Library_manager
         String[] options={"1-Add book","2-Display books","3-Search book","4-Remove book","5-Register member","6-Display members",
         "7-Borrow book","8-Update status of books","9-Return book","10-Book borrowers","11-Over due books","12-Exit"};
         String []option={"1-Search by title","2-search by author"};
-
+        
         try(Scanner val=new Scanner(System.in))
         {
             while (true) 
@@ -477,7 +508,7 @@ public class Library_manager
                             System.out.println(value);
                         }           
                         System.out.print("Enter the type :");     
-                        type=val.nextLine().trim();
+                        type=val.nextLine().trim().toUpperCase();
                         for(types value:types.values())
                         {
                             if(value.toString().equalsIgnoreCase(type))
@@ -491,6 +522,7 @@ public class Library_manager
                             types memberType=types.valueOf(type);
                             Member member=new Member(name,id,memberType);
                             Members.add(member);
+                            AllPeople.add(member);
                             System.out.println("New member registered");
                         }
                         else
@@ -510,10 +542,10 @@ public class Library_manager
                     {
                         String available,borrow;
                         int borrowCount,limit;
-                        types memberType=null;
+                        types memberType;
                         availabilityStatus=false;
                         borrowCount=0;
-                        type="";
+                        memberType=null;
                         System.out.print("Enter the title of book to check availability :");
                         available=val.nextLine().trim();
                         for(int i=0;i<Books.size();i++)
@@ -553,6 +585,11 @@ public class Library_manager
                                                 borrowCount++;
                                             }
                                         }
+                                        if(memberType==null)
+                                        {
+                                            System.out.println("Something went wrong");
+                                            break;
+                                        }
                                         limit=memberType.getMaxBooks();
                                         if(borrowCount>=limit)
                                         {
@@ -561,11 +598,16 @@ public class Library_manager
                                         }
                                         else
                                         {
-                                            System.out.println(""+name+" borrowed "+available+" book");
                                             Books.get(i).setNumberOfBooks(Books.get(i).getNumberOfBooks()-1);
                                             BorrowerName.add(name);
                                             BorrowerTitle.add(available);
                                             DueDates.add(LocalDate.now().plusDays(7));
+                                            Book.BorrowInfo value=Books.get(i).new BorrowInfo(name,LocalDate.now());
+                                            value.printInfo();
+                                            for(int j=0;j<AllPeople.size();j++)
+                                            {
+                                                System.out.println(AllPeople.get(j).getPrivileges());
+                                            }
                                             break;
                                         }
                                     }
@@ -684,6 +726,8 @@ public class Library_manager
                     {
                         System.out.println("Invalid option chosen");
                     }
+
+                    
                 }
                 if(exit==true)
                 {
