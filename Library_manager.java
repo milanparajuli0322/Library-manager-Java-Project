@@ -3,8 +3,60 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Scanner;
 
+
 public class Library_manager 
 {   
+
+    public static class Book
+    {
+        private String title,author,genre;
+        private int numberOfBooks;
+        Book(String title,String author,String genre,int numberOfBooks)
+        {
+            this.title=title;
+            this.author=author;
+            this.genre=genre;
+            this.numberOfBooks=numberOfBooks;
+        }
+        public String getTitle()
+        {
+            return title;
+        }
+        public void setTitle(String title)
+        {
+            this.title=title;
+        }
+        public String getAuthor()
+        {
+            return author;
+        }
+        public void setAuthor(String author)
+        {
+            this.author=author;
+        }
+        public String getGenre()
+        {
+            return genre;
+        }
+        public void setGenre(String genre)
+        {
+            this.genre=genre;
+        }
+        public int getNumberOfBooks()
+        {
+            return numberOfBooks;
+        }
+        public void setNumberOfBooks(int numberOfBooks)
+        {
+            this.numberOfBooks=numberOfBooks;
+        }
+        public boolean isAvailable()
+        {
+            return numberOfBooks>0;
+        }
+    }
+
+
     /*enum constructors*/
     enum types
     {
@@ -25,14 +77,15 @@ public class Library_manager
     }
 
 
-    public static void displayBooks(ArrayList<String> Titles,ArrayList<String> Authors,ArrayList<String> Genres,ArrayList<Integer> UpdateStatus)
+    public static void displayBooks(ArrayList<Book> Books)
     {
-        if(!Titles.isEmpty())
+        if(!Books.isEmpty())
         {
             System.out.println("Showing all books from library :");
-            for (int i = 0; i < Titles.size(); i++)
+            for (int i = 0; i < Books.size(); i++)
             {
-                System.out.println("Book name :"+Titles.get(i)+"  Book author :"+Authors.get(i)+"  Book genre :"+Genres.get(i)+"  Books available :"+UpdateStatus.get(i)+"");
+                Book b=Books.get(i);
+                System.out.println("Book name :"+b.getTitle()+"  Book author :"+b.getAuthor()+"  Book genre :"+b.getGenre()+"  Books available :"+b.getNumberOfBooks()+"");
             }
         }
         else
@@ -42,23 +95,53 @@ public class Library_manager
     }
     
 
-    public static void displayBooks(ArrayList<String> Titles,ArrayList<String> Authors,ArrayList<String> Genres,ArrayList<Integer> UpdateStatus,String genreFilter)
+    public static void displayBooks(ArrayList<Book> Books,String genreFilter)
     {
-        if(!Titles.isEmpty())
+        if(!Books.isEmpty())
         {
             System.out.println("Showing all books from library :");
-            for (int i = 0; i < Titles.size(); i++)
+            for (int i = 0; i < Books.size(); i++)
             {
-                if(Genres.get(i).equals(genreFilter))
+                if(Books.get(i).getGenre().equals(genreFilter))
                 {
-                    System.out.println("Book name :"+Titles.get(i)+"  Book author :"+Authors.get(i)+"  Book genre :"+Genres.get(i)+"  Books available :"+UpdateStatus.get(i)+"");
+                    Book b=Books.get(i);
+                    System.out.println("Book name :"+b.getTitle()+"  Book author :"+b.getAuthor()+"  Book genre :"+b.getGenre()+"  Books available :"+b.getNumberOfBooks()+"");
                 }
+
             }
         }
         else
         {
             System.out.println("No books available");
         }
+    }
+
+
+      public static boolean recursiveSearchTitle(ArrayList<Book> Books,int index,String search)
+    {
+        if(index==Books.size())
+        {
+            return false;
+        }
+        if(Books.get(index).getTitle().equals(search))
+        {
+            return true;
+        }
+        return recursiveSearchTitle(Books, index+1, search);
+    }
+
+
+    public static boolean recursiveSearchAuthor(ArrayList<Book> Books,int index,String search)
+    {
+        if(index==Books.size())
+        {
+            return false;
+        }
+        if(Books.get(index).getAuthor().equals(search))
+        {
+            return true;
+        }
+        return recursiveSearchAuthor(Books, index+1, search);
     }
 
 
@@ -97,7 +180,11 @@ public class Library_manager
         System.out.println("Showing overdue books :");
         for(int i=0;i<DueDates.size();i++)
         {
-            if(DueDates.get(i).isBefore(LocalDate.now()))
+            if(!DueDates.get(i).isBefore(LocalDate.now()))
+            {
+                continue;
+            }
+            else
             {
                 daysLate=ChronoUnit.DAYS.between(DueDates.get(i),LocalDate.now());
                 if(daysLate>=10)
@@ -123,33 +210,7 @@ public class Library_manager
     }
 
 
-    public static boolean recursiveSearchTitle(ArrayList<String> Titles,int index,String search)
-    {
-        if(index==Titles.size())
-        {
-            return false;
-        }
-        if(Titles.get(index).equals(search))
-        {
-            return true;
-        }
-        return recursiveSearchTitle(Titles, index+1, search);
-    }
-
-
-    public static boolean recursiveSearchAuthor(ArrayList<String> Author,int index,String search)
-    {
-        if(index==Author.size())
-        {
-            return false;
-        }
-        if(Author.get(index).equals(search))
-        {
-            return true;
-        }
-        return recursiveSearchAuthor(Author, index+1, search);
-    }
-
+  
     
     public static void main(String[] args) 
     {   
@@ -158,10 +219,8 @@ public class Library_manager
         String name,type,genreFilter;
         boolean found,exit=false,availabilityStatus,updateStatus;
 
-        ArrayList<String>Titles = new ArrayList<>();
-        ArrayList<String>Authors = new ArrayList<>();
-        ArrayList<String>Genres = new ArrayList<>();
-        ArrayList<Integer>UpdateStatus = new ArrayList<>();
+        ArrayList<Book>Books=new ArrayList<>();
+
         ArrayList<String>Ids = new ArrayList<>();
         ArrayList<String>Names = new ArrayList<>();
         ArrayList<String>Types = new ArrayList<>();
@@ -239,10 +298,8 @@ public class Library_manager
                             }
                         }
 
-                        Titles.add(title);
-                        Authors.add(author);
-                        Genres.add(genre);
-                        UpdateStatus.add(numberOfBooks);
+                        Book book=new Book(title, author, genre, numberOfBooks);
+                        Books.add(book);
                         System.out.println("Book details added");
                     }
 
@@ -253,11 +310,11 @@ public class Library_manager
                         genreFilter = val.nextLine().trim();
                         if(genreFilter.isEmpty())
                         {
-                            displayBooks(Titles,Authors,Genres,UpdateStatus);
+                            displayBooks(Books);
                         }
                         else
                         {
-                            displayBooks(Titles,Authors,Genres,UpdateStatus,genreFilter);
+                            displayBooks(Books,genreFilter);
                         }
                     }
                     
@@ -295,7 +352,7 @@ public class Library_manager
                                 System.out.print("Enter the title of book to search :");
                                 search=val.nextLine().trim();
                                 System.out.println("Searching...");
-                                found=recursiveSearchTitle(Titles,0, search);
+                                found=recursiveSearchTitle(Books,0, search);
                                 if(found==true)
                                 {
                                     System.out.println("Book found");
@@ -312,7 +369,7 @@ public class Library_manager
                                 System.out.print("Enter the author of book to search :");
                                 search=val.nextLine().trim();
                                 System.out.println("Searching...");
-                                found=recursiveSearchAuthor(Authors,0, search);
+                                found=recursiveSearchAuthor(Books,0, search);
                                 if(found==true)
                                 {
                                     System.out.println("Book found");
@@ -337,14 +394,11 @@ public class Library_manager
                         found=false;
                         System.out.print("Enter the title of book to remove :");
                         remove=val.nextLine().trim();
-                        for(int i=Titles.size()-1;i>=0;i--)
+                        for(int i=Books.size()-1;i>=0;i--)
                         {
-                            if(Titles.get(i).equals(remove))
+                            if(Books.get(i).getTitle().equals(remove))
                             {
-                                Titles.remove(i);
-                                Authors.remove(i);
-                                Genres.remove(i);
-                                UpdateStatus.remove(i);
+                                Books.remove(i);
                                 System.out.println("Book details removed");
                                 found=true;
                             }
@@ -414,11 +468,11 @@ public class Library_manager
                         type="";
                         System.out.print("Enter the title of book to check availability :");
                         available=val.nextLine().trim();
-                        for(int i=0;i<Titles.size();i++)
+                        for(int i=0;i<Books.size();i++)
                         {
-                            if(Titles.get(i).equals(available))
+                            if(Books.get(i).getTitle().equals(available))
                             {
-                                if(UpdateStatus.get(i)>0)
+                                if(Books.get(i).getNumberOfBooks()>0)
                                 {
                                     System.out.println("Book available");
                                     availabilityStatus=true;
@@ -460,9 +514,8 @@ public class Library_manager
                                         }
                                         else
                                         {
-                                            status=UpdateStatus.get(i);
                                             System.out.println(""+name+" borrowed "+available+" book");
-                                            UpdateStatus.set(i,status-1);
+                                            Books.get(i).setNumberOfBooks(Books.get(i).getNumberOfBooks()-1);
                                             BorrowerName.add(name);
                                             BorrowerTitle.add(available);
                                             DueDates.add(LocalDate.now().plusDays(7));
@@ -489,9 +542,9 @@ public class Library_manager
                         updateStatus=false;
                         System.out.print("Enter the title of book to update status :");
                         update=val.nextLine().trim();
-                        for(int i=0;i<Titles.size();i++)
+                        for(int i=0;i<Books.size();i++)
                         {
-                            if(Titles.get(i).equals(update))
+                            if(Books.get(i).getTitle().equals(update))
                             {
                                 status=-1;
                                 while(status==-1)
@@ -510,7 +563,7 @@ public class Library_manager
                                         status=-1;
                                     }
                                 }
-                                UpdateStatus.set(i,status);
+                                Books.get(i).setNumberOfBooks(status);
                                 System.out.println("Book availablity updated");
                                 updateStatus=true;
                                 break;
@@ -548,12 +601,11 @@ public class Library_manager
                         }
                         else
                         {
-                            for(int i=0;i<Titles.size();i++)
+                            for(int i=0;i<Books.size();i++)
                             {
-                                if(Titles.get(i).equals(returnBook))
+                                if(Books.get(i).getTitle().equals(returnBook))
                                 {
-                                    status=UpdateStatus.get(i);
-                                    UpdateStatus.set(i,status+1);
+                                    Books.get(i).setNumberOfBooks(Books.get(i).getNumberOfBooks()+1);
                                     System.out.println(name+" returned "+returnBook+" book");
                                     break;
                                 }
