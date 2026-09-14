@@ -57,6 +57,55 @@ public class Library_manager
     }
 
 
+    public static abstract class Person
+    {
+        private String name,id;
+        Person(String name,String id)
+        {
+            this.name=name;
+            this.id=id;
+        }
+        public String getName()
+        {
+            return name;
+        }
+        public String getId()
+        {
+            return id;
+        }
+    } 
+
+
+    public static class Member extends Person
+    {
+        private types type;
+        Member(String name,String id,types type)
+        {
+            super(name,id);
+            this.type=type;
+        }
+        public types getType()
+        {
+            return type;
+        }
+    }
+
+
+    public static class Librarian extends Person
+    {
+        private String department;
+        Librarian(String name,String id,String department)
+        {
+            super(name,id);
+            this.department=department;
+        }
+        public String getDepartment()
+        {
+            return department;
+        }
+    }
+
+
     /*enum constructors*/
     enum types
     {
@@ -145,17 +194,17 @@ public class Library_manager
     }
 
 
-    public static void displayMembers(ArrayList<String> Names,ArrayList<String> Ids,ArrayList<String> Types,ArrayList<String> BorrowerName)
+    public static void displayMembers(ArrayList<Member> Members,ArrayList<String> BorrowerName)
     {
         double percentBorrowing;
         System.out.println("Showing all members :");
-        for(int i=0;i<Names.size();i++)
+        for(int i=0;i<Members.size();i++)
         {
-            System.out.println("Id :"+Ids.get(i)+"  Names :"+Names.get(i)+"  Membership type :"+Types.get(i)+"");
+            System.out.println("Id :"+Members.get(i).getId()+"  Names :"+Members.get(i).getName()+"  Membership type :"+Members.get(i).getType()+"");
         }
-        if(!Names.isEmpty())
+        if(!Members.isEmpty())
         {
-            percentBorrowing=(double) BorrowerName.size()/Names.size()*100;
+            percentBorrowing=(double) BorrowerName.size()/Members.size()*100;
             System.out.println("Percentage of members currently borrowing books :"+percentBorrowing+"%");
         }
     }
@@ -220,10 +269,8 @@ public class Library_manager
         boolean found,exit=false,availabilityStatus,updateStatus;
 
         ArrayList<Book>Books=new ArrayList<>();
+        ArrayList<Member>Members=new ArrayList<>();
 
-        ArrayList<String>Ids = new ArrayList<>();
-        ArrayList<String>Names = new ArrayList<>();
-        ArrayList<String>Types = new ArrayList<>();
         ArrayList<String>BorrowerName = new ArrayList<>();
         ArrayList<String>BorrowerTitle = new ArrayList<>();
         ArrayList<LocalDate>DueDates = new ArrayList<>();
@@ -420,7 +467,7 @@ public class Library_manager
                         System.out.print("Enter the name :");
                         name=val.nextLine().trim();  
 
-                        idNumber=Ids.size()+1; 
+                        idNumber=Members.size()+1; 
                         id=String.format("%05d",idNumber);
 
 
@@ -441,9 +488,9 @@ public class Library_manager
                         }  
                         if(validType==true)
                         {
-                            Ids.add(id);
-                            Names.add(name);
-                            Types.add(type);
+                            types memberType=types.valueOf(type);
+                            Member member=new Member(name,id,memberType);
+                            Members.add(member);
                             System.out.println("New member registered");
                         }
                         else
@@ -455,7 +502,7 @@ public class Library_manager
 
                     case 6->
                     {
-                        displayMembers(Names,Ids,Types,BorrowerName);
+                        displayMembers(Members,BorrowerName);
                     }
 
 
@@ -463,6 +510,7 @@ public class Library_manager
                     {
                         String available,borrow;
                         int borrowCount,limit;
+                        types memberType=null;
                         availabilityStatus=false;
                         borrowCount=0;
                         type="";
@@ -484,11 +532,11 @@ public class Library_manager
                                         System.out.print("Enter the name :");
                                         name=val.nextLine().trim();
                                         found=false;
-                                        for(int j=0;j<Names.size();j++)
+                                        for(int j=0;j<Members.size();j++)
                                         {
-                                            if(Names.get(j).equals(name))
+                                            if(Members.get(j).getName().equals(name))
                                             {
-                                                type=Types.get(j);   
+                                                memberType=Members.get(j).getType();   
                                                 found=true;
                                                 break;
                                             }
@@ -505,7 +553,6 @@ public class Library_manager
                                                 borrowCount++;
                                             }
                                         }
-                                        types memberType=types.valueOf(type);
                                         limit=memberType.getMaxBooks();
                                         if(borrowCount>=limit)
                                         {
