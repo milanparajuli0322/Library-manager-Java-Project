@@ -4,9 +4,19 @@ import java.util.ArrayList;
 import java.util.Scanner;
 
 
+
 public class Library_manager 
 {   
+    public static class BookNotAvailableException extends Exception
+    {
+        public BookNotAvailableException(String message)
+        {
+            super(message);
+        }
+    }
 
+
+    
     public static class Book
     {
         private String title, author, genre;
@@ -65,6 +75,8 @@ public class Library_manager
             return numberOfBooks > 0;
         }
 
+
+
         class BorrowInfo
         {
             String borrowerName;
@@ -84,6 +96,7 @@ public class Library_manager
             }
         }
     }
+
 
 
     public static abstract class Person
@@ -160,7 +173,8 @@ public class Library_manager
     }
 
 
-    /* enum constructors */
+    
+    /*enum*/
     public enum types
     {
         STUDENT(3),
@@ -179,6 +193,7 @@ public class Library_manager
             return maxBooks;
         }
     }
+
 
 
     public static void displayBooks(ArrayList<Book> Books)
@@ -205,6 +220,7 @@ public class Library_manager
         }
     }
     
+
 
     public static void displayBooks(ArrayList<Book> Books, String genreFilter)
     {
@@ -234,6 +250,7 @@ public class Library_manager
     }
 
 
+
     public static boolean recursiveSearchTitle(
         ArrayList<Book> Books, int index, String search)
     {
@@ -251,6 +268,7 @@ public class Library_manager
     }
 
 
+
     public static boolean recursiveSearchAuthor(
         ArrayList<Book> Books, int index, String search)
     {
@@ -266,6 +284,7 @@ public class Library_manager
 
         return recursiveSearchAuthor(Books, index + 1, search);
     }
+
 
 
     public static void displayMembers(
@@ -297,6 +316,7 @@ public class Library_manager
     }
 
 
+
     public static void bookBorrower(
         ArrayList<String> BorrowerName,
         ArrayList<String> BorrowerTitle,
@@ -313,6 +333,7 @@ public class Library_manager
             );
         }
     }
+
 
 
     public static void overdueBooks(
@@ -374,6 +395,7 @@ public class Library_manager
     }
 
     
+
     public static void main(String[] args) 
     {   
         System.out.println("-----Library manager-----");
@@ -386,16 +408,21 @@ public class Library_manager
                 return "Temporary library access";
             }
         };
-
         System.out.println(test.getPrivileges());
+
+
 
         int choice, status;
         String name, type, genreFilter;
         boolean found, exit = false, availabilityStatus, updateStatus;
-
         ArrayList<Book> Books = new ArrayList<>();
         ArrayList<Member> Members = new ArrayList<>();
         ArrayList<Privileged> AllPeople = new ArrayList<>();
+        ArrayList<String> BorrowerName = new ArrayList<>();
+        ArrayList<String> BorrowerTitle = new ArrayList<>();
+        ArrayList<LocalDate> DueDates = new ArrayList<>();
+
+
 
         Librarian librarian = new Librarian(
             "Library Manager",
@@ -404,9 +431,7 @@ public class Library_manager
         );
         AllPeople.add(librarian);
 
-        ArrayList<String> BorrowerName = new ArrayList<>();
-        ArrayList<String> BorrowerTitle = new ArrayList<>();
-        ArrayList<LocalDate> DueDates = new ArrayList<>();
+
 
         String[] options = {
             "1-Add book",
@@ -428,6 +453,8 @@ public class Library_manager
             "2-search by author"
         };
         
+
+
         try (Scanner val = new Scanner(System.in))
         {
             while (true) 
@@ -439,8 +466,8 @@ public class Library_manager
                     System.out.println(value);
                 }
 
-                choice = -1;
 
+                choice = -1;
                 while (choice == -1)
                 {
                     try
@@ -456,6 +483,7 @@ public class Library_manager
                         choice = -1;
                     }
                 }
+
 
                 switch (choice)
                 {
@@ -520,6 +548,7 @@ public class Library_manager
                     }
 
 
+                    
                     case 2->
                     {
                         System.out.print(
@@ -538,6 +567,7 @@ public class Library_manager
                         }
                     }
                     
+
 
                     case 3->
                     {
@@ -628,6 +658,7 @@ public class Library_manager
                     }
 
 
+
                     case 4->
                     {
                         String remove;
@@ -655,6 +686,7 @@ public class Library_manager
                         }
                     }
                     
+
 
                     case 5->
                     {
@@ -714,10 +746,12 @@ public class Library_manager
                     }
 
 
+
                     case 6->
                     {
                         displayMembers(Members, BorrowerName);
                     }
+
 
 
                     case 7->
@@ -738,106 +772,117 @@ public class Library_manager
 
                         for (int i = 0; i < Books.size(); i++)
                         {
-                            if (Books.get(i).getTitle().equals(available))
+                            try
                             {
-                                if (Books.get(i).getNumberOfBooks() > 0)
+                                if (Books.get(i).getTitle().equals(available))
                                 {
-                                    System.out.println("Book available");
-                                    availabilityStatus = true;
-
-                                    System.out.print(
-                                        "Enter (y/n) to borrow book :"
-                                    );
-
-                                    borrow = val.nextLine();
-
-                                    if (borrow.equalsIgnoreCase("y"))
+                                    if (Books.get(i).getNumberOfBooks() > 0)
                                     {
-                                        System.out.print("Enter the name :");
-                                        name = val.nextLine().trim();
+                                        System.out.println("Book available");
+                                        availabilityStatus = true;
 
-                                        found = false;
+                                        System.out.print(
+                                            "Enter (y/n) to borrow book :"
+                                        );
 
-                                        for (int j = 0; j < Members.size(); j++)
+                                        borrow = val.nextLine();
+
+                                        if (borrow.equalsIgnoreCase("y"))
                                         {
-                                            if (Members.get(j).getName().equals(name))
+                                            System.out.print("Enter the name :");
+                                            name = val.nextLine().trim();
+
+                                            found = false;
+
+                                            for (int j = 0; j < Members.size(); j++)
                                             {
-                                                memberType = Members.get(j).getType();   
-                                                found = true;
+                                                if (Members.get(j).getName().equals(name))
+                                                {
+                                                    memberType = Members.get(j).getType();   
+                                                    found = true;
+                                                    break;
+                                                }
+                                            }
+
+                                            if (!found)
+                                            {
+                                                System.out.println(
+                                                    name
+                                                    + " is not a registered member.cannot borrow book"
+                                                );
+                                                break;
+                                            }
+
+                                            for (int j = 0; j < BorrowerName.size(); j++)
+                                            {
+                                                if (BorrowerName.get(j).equals(name))
+                                                {
+                                                    borrowCount++;
+                                                }
+                                            }
+
+                                            if (memberType == null)
+                                            {
+                                                System.out.println(
+                                                    "Something went wrong"
+                                                );
+                                                break;
+                                            }
+
+                                            limit = memberType.getMaxBooks();
+
+                                            if (borrowCount >= limit)
+                                            {
+                                                System.out.println(
+                                                    name
+                                                    + " has reached borrowing limit of "
+                                                    + limit
+                                                    + " books"
+                                                );
+                                                break;
+                                            }
+                                            else
+                                            {
+                                                Books.get(i).setNumberOfBooks(
+                                                    Books.get(i).getNumberOfBooks() - 1
+                                                );
+
+                                                BorrowerName.add(name);
+                                                BorrowerTitle.add(available);
+                                                DueDates.add(LocalDate.now().plusDays(7));
+
+                                                Book.BorrowInfo value =
+                                                    Books.get(i).new BorrowInfo(
+                                                        name,
+                                                        LocalDate.now()
+                                                    );
+
+                                                value.printInfo();
+
+                                                for (int j = 0; j < AllPeople.size(); j++)
+                                                {
+                                                    System.out.println(
+                                                        AllPeople.get(j).getPrivileges()
+                                                    );
+                                                }
+
                                                 break;
                                             }
                                         }
-
-                                        if (!found)
-                                        {
-                                            System.out.println(
-                                                name
-                                                + " is not a registered member.cannot borrow book"
-                                            );
-                                            break;
-                                        }
-
-                                        for (int j = 0; j < BorrowerName.size(); j++)
-                                        {
-                                            if (BorrowerName.get(j).equals(name))
-                                            {
-                                                borrowCount++;
-                                            }
-                                        }
-
-                                        if (memberType == null)
-                                        {
-                                            System.out.println(
-                                                "Something went wrong"
-                                            );
-                                            break;
-                                        }
-
-                                        limit = memberType.getMaxBooks();
-
-                                        if (borrowCount >= limit)
-                                        {
-                                            System.out.println(
-                                                name
-                                                + " has reached borrowing limit of "
-                                                + limit
-                                                + " books"
-                                            );
-                                            break;
-                                        }
                                         else
                                         {
-                                            Books.get(i).setNumberOfBooks(
-                                                Books.get(i).getNumberOfBooks() - 1
-                                            );
-
-                                            BorrowerName.add(name);
-                                            BorrowerTitle.add(available);
-                                            DueDates.add(LocalDate.now().plusDays(7));
-
-                                            Book.BorrowInfo value =
-                                                Books.get(i).new BorrowInfo(
-                                                    name,
-                                                    LocalDate.now()
-                                                );
-
-                                            value.printInfo();
-
-                                            for (int j = 0; j < AllPeople.size(); j++)
-                                            {
-                                                System.out.println(
-                                                    AllPeople.get(j).getPrivileges()
-                                                );
-                                            }
-
                                             break;
-                                        }
+                                        }  
                                     }
                                     else
                                     {
-                                        break;
-                                    }  
+                                        throw new BookNotAvailableException("Books not available");
+                                    }
                                 }
+                            }
+                            catch(BookNotAvailableException e)
+                            {
+                                System.out.println("Books not available");
                             }
                         }
 
@@ -846,6 +891,7 @@ public class Library_manager
                             System.out.println("Book not available");
                         }
                     }
+
 
 
                     case 8->
@@ -904,6 +950,7 @@ public class Library_manager
                             System.out.println("Book not found");
                         }
                     }
+
 
 
                     case 9->
@@ -965,6 +1012,7 @@ public class Library_manager
                     }
 
 
+
                     case 10->
                     {
                         bookBorrower(
@@ -973,6 +1021,7 @@ public class Library_manager
                             DueDates
                         );
                     }
+
 
 
                     case 11->
@@ -985,6 +1034,7 @@ public class Library_manager
                     }
 
 
+
                     case 12->
                     {
                         System.out.println("Visit again");
@@ -992,11 +1042,13 @@ public class Library_manager
                     }
 
 
+
                     default->
                     {
                         System.out.println("Invalid option chosen");
                     }
                 }
+
 
                 if (exit)
                 {
